@@ -1,13 +1,13 @@
-package com.example.demo;
+package com.jiang.gmall.user;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class DemoApplication {
+public class GmallUserWebApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(DemoApplication.class, args);
+        SpringApplication.run(GmallUserWebApplication.class, args);
     }
 
 }
