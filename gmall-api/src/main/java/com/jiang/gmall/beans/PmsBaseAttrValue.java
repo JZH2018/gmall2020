@@ -6,6 +6,7 @@ import javax.persistence.Transient;
 import java.io.Serializable;
 
 /**
+ * 属性值
  * @param
  * @return
  */
@@ -22,6 +23,7 @@ public class PmsBaseAttrValue implements Serializable {
 
     @Transient
     private String urlParam;
+
 
     public String getId() {
         return id;
