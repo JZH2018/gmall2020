@@ -1,8 +1,6 @@
 package com.jiang.gmall.beans;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import java.io.Serializable;
 
 /**
@@ -12,6 +10,7 @@ import java.io.Serializable;
  */
 public class PmsBaseAttrValue implements Serializable {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
     private String id;
     @Column
