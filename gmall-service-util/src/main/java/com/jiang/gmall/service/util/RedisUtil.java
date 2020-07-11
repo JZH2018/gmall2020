@@ -1,4 +1,4 @@
-package com.jiang.gmall.service;
+package com.jiang.gmall.service.util;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;

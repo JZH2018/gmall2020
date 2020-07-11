@@ -10,7 +10,7 @@ import com.jiang.gmall.manage.mapper.PmsSkuAttrValueMapper;
 import com.jiang.gmall.manage.mapper.PmsSkuImageMapper;
 import com.jiang.gmall.manage.mapper.PmsSkuInfoMapper;
 import com.jiang.gmall.manage.mapper.PmsSkuSaleAttrValueMapper;
-import com.jiang.gmall.service.RedisUtil;
+import com.jiang.gmall.service.util.RedisUtil;
 import com.jiang.gmall.service.SkuService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +19,7 @@ import redis.clients.jedis.Jedis;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class SkuServiceImpl implements SkuService {
@@ -83,7 +84,7 @@ public class SkuServiceImpl implements SkuService {
 
 
     @Override
-    public PmsSkuInfo getSkuById(String skuId) {
+    public PmsSkuInfo getSkuById(String skuId,String IP) {
         //SKU的商品对象
         PmsSkuInfo pmsSkuInfo = new PmsSkuInfo();
         //链接缓存
@@ -95,8 +96,9 @@ public class SkuServiceImpl implements SkuService {
         if(StringUtils.isNoneBlank(skuJson)){
             pmsSkuInfo =JSON.parseObject(skuJson,PmsSkuInfo.class);
         }else {
+            String token = UUID.randomUUID().toString();
             //设置分布式锁
-          String OK = jedis.set("sku"+ skuId + ":lock","1","nx","px",10);
+          String OK = jedis.set("sku"+ skuId + ":lock",token,"nx","px",10*1000); //10s的过期时间
             if(StringUtils.isNotBlank(OK)&& OK.equals("OK")){
                 //设置成功 有权访问数据库
                 //如果缓存中没有 查询Mysql
@@ -109,6 +111,11 @@ public class SkuServiceImpl implements SkuService {
                     //设置当数据库中也不存在时，在缓存设置一段时间为空值给redis
                     jedis.setex("sku:"+skuId+":info",60*3,JSON.toJSONString(""));
                 }
+               String lockToken = jedis.get("sku"+ skuId + ":lock");
+                if(StringUtils.isNotBlank(lockToken)&& lockToken.equals(token)){ //用token确认删除的是自己的锁
+                    //在访问mysql后将redis的分布式锁释放
+                    jedis.del("sku"+ skuId + ":lock");
+                }
             }else {
                 //访问失败 ，自旋 （该线程在睡眠几秒后，重新尝试访问本方法）
                 try {
@@ -116,7 +123,7 @@ public class SkuServiceImpl implements SkuService {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                return getSkuById(skuId);
+                return getSkuById(skuId,IP);
             }
         }
         jedis.close();

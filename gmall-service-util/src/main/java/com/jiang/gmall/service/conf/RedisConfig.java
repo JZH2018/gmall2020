@@ -1,5 +1,6 @@
-package com.jiang.gmall.service;
+package com.jiang.gmall.service.conf;
 
+import com.jiang.gmall.service.util.RedisUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
